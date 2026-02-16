@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import numpy as np
 import pandas as pd
@@ -7,14 +8,23 @@ import os
 
 app = FastAPI()
 
-# --- 1. Safely locate the .pkl file in Vercel's environment ---
+# --- 1. NEW: Add CORS so Vercel can talk to Render ---
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # In production, you can replace "*" with your actual Vercel URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# --- 2. Safely locate the .pkl file ---
 current_dir = os.path.dirname(os.path.realpath(__file__))
 model_path = os.path.join(current_dir, "rf_model_energy.pkl")
 
-# --- 2. Load the model ---
+# --- 3. Load the model ---
 rf_model_loaded = joblib.load(model_path)
 
-# --- 3. Define the expected input data structure ---
+# --- 4. Define the expected input data structure ---
 class EnergyInput(BaseModel):
     square_meters: float
     year_built: int
