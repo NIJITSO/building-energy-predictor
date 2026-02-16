@@ -4,18 +4,25 @@ from pydantic import BaseModel
 import numpy as np
 import pandas as pd
 import joblib
-import os
 
 app = FastAPI()
 
+<<<<<<< HEAD:api/index.py
 # --- 1. NEW: Add CORS so Vercel can talk to Render ---
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], # In production, you can replace "*" with your actual Vercel URL
+=======
+# Allow Next.js (port 3000) to communicate with this API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"], 
+>>>>>>> parent of ddbaf18 (updates for vercel):backend/main.py
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+<<<<<<< HEAD:api/index.py
 
 # --- 2. Safely locate the .pkl file ---
 current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -25,13 +32,20 @@ model_path = os.path.join(current_dir, "rf_model_energy.pkl")
 rf_model_loaded = joblib.load(model_path)
 
 # --- 4. Define the expected input data structure ---
+=======
+
+# Load the model once when the server starts
+rf_model_loaded = joblib.load("rf_model_energy.pkl")
+
+# Define the expected input data structure
+>>>>>>> parent of ddbaf18 (updates for vercel):backend/main.py
 class EnergyInput(BaseModel):
     square_meters: float
     year_built: int
     primary_use: int
     date: str
 
-@app.post("/api/predict")
+@app.post("/predict")
 def predict_energy_from_api(data: EnergyInput):
     api_input = data.dict()
     
