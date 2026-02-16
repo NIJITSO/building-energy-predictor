@@ -1,32 +1,27 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import numpy as np
 import pandas as pd
 import joblib
+import os
 
 app = FastAPI()
 
-# Allow Next.js (port 3000) to communicate with this API
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000"], 
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# --- 1. Safely locate the .pkl file in Vercel's environment ---
+current_dir = os.path.dirname(os.path.realpath(__file__))
+model_path = os.path.join(current_dir, "rf_model_energy.pkl")
 
-# Load the model once when the server starts
-rf_model_loaded = joblib.load("rf_model_energy.pkl")
+# --- 2. Load the model ---
+rf_model_loaded = joblib.load(model_path)
 
-# Define the expected input data structure
+# --- 3. Define the expected input data structure ---
 class EnergyInput(BaseModel):
     square_meters: float
     year_built: int
     primary_use: int
     date: str
 
-@app.post("/predict")
+@app.post("/api/predict")
 def predict_energy_from_api(data: EnergyInput):
     api_input = data.dict()
     
